@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // In-memory storage (note: this will reset when server restarts)
-export const taskViewers: Record<string, Set<string>> = {};
+const taskViewers: Record<string, Set<string>> = {};
 
 
 

@@ -1,28 +1,25 @@
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
-import { faker } from '@faker-js/faker'
-import { Task } from '@/app/types/task'
-import { NextResponse } from 'next/server'
-import { tasks } from './db/tasks'
-import { taskViewers } from '../telemetry/route'
+import { faker } from "@faker-js/faker";
+import { Task } from "@/app/types/task";
+import { NextResponse } from "next/server";
+import { tasks } from "./db/tasks";
 
 export async function GET() {
-    console.log(taskViewers)
-    const tasksWithViewers = tasks.map(task => ({
-        ...task,
-        viewers: taskViewers[task.id] || []
-    }))
+  const tasksWithViewers = tasks.map((task) => ({
+    ...task,
+  }));
   return NextResponse.json({
-    tasks: tasksWithViewers
-  })
+    tasks: tasksWithViewers,
+  });
 }
 
 export async function POST(request: Request) {
-  const body = await request.json()
+  const body = await request.json();
   const newTask: Task = {
     ...body,
     id: faker.string.uuid(),
     createdAt: new Date().toISOString(),
-  }
-  return NextResponse.json(newTask)
-} 
+  };
+  return NextResponse.json(newTask);
+}
