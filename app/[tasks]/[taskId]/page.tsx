@@ -8,7 +8,7 @@ type Props = {
 
 export default async function Page({ params }: Props) {
     const { taskId } = await params;
-    const task = await fetch(`https://task-multiplayer.vercel.app/api/tasks/${taskId}`);
+    const task = await fetch(`http://localhost:3000/api/tasks/${taskId}`);
     const taskData = await task.json();
   return (
     <TaskLanding task={taskData} />

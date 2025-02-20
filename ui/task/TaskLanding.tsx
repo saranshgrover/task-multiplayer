@@ -34,7 +34,7 @@ export default function TaskLanding({ task }: Props) {
   useEffect(() => {
     // Function to fetch viewers
     const fetchViewers = () => {
-      fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
+      fetch(`http://localhost:3000/api/telemetry`, {
         method: "POST",
         body: JSON.stringify({
           user,
