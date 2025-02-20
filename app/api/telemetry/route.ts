@@ -3,7 +3,28 @@ import { NextResponse } from 'next/server';
 // In-memory storage (note: this will reset when server restarts)
 const taskViewers: Record<string, Set<string>> = {};
 
+// CORS configuration
+const allowedOrigins = [
+    'https://task-multiplayer-e9ffkvnod-saranshgrovers-projects.vercel.app',
+    'https://task-multiplayer-git-main-saranshgrovers-projects.vercel.app',
+    'https://task-multiplayer.vercel.app'
+];
 
+function getCorsHeaders(request: Request) {
+    const origin = request.headers.get('origin');
+    // Only allow specified origins
+    const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+    
+    return {
+        'Access-Control-Allow-Origin': isAllowedOrigin ? origin : '',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+    };
+}
+
+export async function OPTIONS(request: Request) {
+    return NextResponse.json({}, { headers: getCorsHeaders(request) });
+}
 
 export async function POST(request: Request) {
     try {
@@ -42,12 +63,12 @@ export async function POST(request: Request) {
             taskId,
             viewers: currentViewers,
             viewerCount: currentViewers.length
-        });
+        }, { headers: getCorsHeaders(request) });
     } catch (error) {
         console.error('Error processing telemetry:', error);
         return NextResponse.json(
             { message: 'Internal server error' },
-            { status: 500 }
+            { status: 500, headers: getCorsHeaders(request) }
         );
     }
 }
@@ -71,12 +92,12 @@ export async function GET(request: Request) {
             taskId,
             viewers: currentViewers,
             viewerCount: currentViewers.length
-        });
+        }, { headers: getCorsHeaders(request) });
     } catch (error) {
         console.error('Error fetching viewers:', error);
         return NextResponse.json(
             { message: 'Internal server error' },
-            { status: 500 }
+            { status: 500, headers: getCorsHeaders(request) }
         );
     }
 } 
