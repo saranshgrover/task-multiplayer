@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // In-memory storage (note: this will reset when server restarts)
-const taskViewers: Record<string, Set<string>> = {};
+const taskViewers: Record<string, Map<string, number>> = {};
 
 // CORS configuration
 const allowedOrigins = [
@@ -29,35 +29,34 @@ export async function OPTIONS(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { user, taskId, action } = body;
+        const { user, taskId } = body;
 
-        if (!user || !taskId || !action) {
+        if (!user || !taskId) {
             return NextResponse.json(
                 { message: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        if (!['view', 'close'].includes(action)) {
-            return NextResponse.json(
-                { message: 'Invalid action' },
-                { status: 400 }
-            );
-        }
-
-        // Initialize Set for taskId if it doesn't exist
+        // Initialize Map for taskId if it doesn't exist
         if (!taskViewers[taskId]) {
-            taskViewers[taskId] = new Set();
+            taskViewers[taskId] = new Map();
         }
 
-        if (action === 'view') {
-            taskViewers[taskId].add(user);
-        } else if (action === 'close') {
-            taskViewers[taskId].delete(user);
+        const now = Date.now();
+
+        // Clean up stale viewers (inactive for more than 10 seconds)
+        for (const [viewerId, lastSeen] of taskViewers[taskId].entries()) {
+            if (now - lastSeen > 10000) {
+                taskViewers[taskId].delete(viewerId);
+            }
         }
 
-        // Convert Set to Array for JSON response
-        const currentViewers = Array.from(taskViewers[taskId]);
+        // Update timestamp for current user
+        taskViewers[taskId].set(user, now);
+
+        // Convert Map to array of viewers
+        const currentViewers = Array.from(taskViewers[taskId].keys());
 
         return NextResponse.json({
             taskId,
@@ -72,32 +71,4 @@ export async function POST(request: Request) {
         );
     }
 }
-
-export async function GET(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const taskId = searchParams.get('taskId');
-
-        if (!taskId) {
-            return NextResponse.json(
-                { message: 'Missing taskId parameter' },
-                { status: 400 }
-            );
-        }
-
-        const viewers = taskViewers[taskId] || new Set();
-        const currentViewers = Array.from(viewers);
-
-        return NextResponse.json({
-            taskId,
-            viewers: currentViewers,
-            viewerCount: currentViewers.length
-        }, { headers: getCorsHeaders(request) });
-    } catch (error) {
-        console.error('Error fetching viewers:', error);
-        return NextResponse.json(
-            { message: 'Internal server error' },
-            { status: 500, headers: getCorsHeaders(request) }
-        );
-    }
-} 
+ 

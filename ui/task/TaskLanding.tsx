@@ -1,8 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from 'react'
-import { Box, Heading, Text, Stack, Badge, VStack, Avatar, AvatarGroup, Flex } from '@chakra-ui/react'
-import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Heading,
+  Text,
+  Stack,
+  Badge,
+  VStack,
+  Avatar,
+  AvatarGroup,
+  Flex,
+} from "@chakra-ui/react";
+import { useSearchParams } from "next/navigation";
 
 type Props = {
   task: {
@@ -13,70 +23,59 @@ type Props = {
     dueDate?: string;
     assignee?: string;
     id: string;
-  }
-}
+  };
+};
 
 export default function TaskLanding({ task }: Props) {
-    const searchParams = useSearchParams();
-    const user = searchParams?.get('user');
-    const [usersViewing, setUsersViewing] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const user = searchParams?.get("user");
+  const [usersViewing, setUsersViewing] = useState<string[]>([]);
 
-    useEffect(() => {
-        // Function to fetch viewers
-        const fetchViewers = () => {
-            fetch(`https://task-multiplayer.vercel.app/api/telemetry?taskId=${task.id}`)
-                .then(res => res.json())
-                .then(data => {
-                    setUsersViewing(data.viewers)
-                })
-                .catch(error => console.error('Error fetching viewers:', error));
-        };
+  useEffect(() => {
+    // Function to fetch viewers
+    const fetchViewers = () => {
+      fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
+        method: "POST",
+        body: JSON.stringify({
+          user,
+          taskId: task.id,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setUsersViewing(data.viewers);
+        })
+        .catch((error) => console.error("Error fetching viewers:", error));
+    };
 
-        // Initial fetch
-        fetchViewers();
+    // Initial fetch
+    fetchViewers();
 
-        // Set up polling interval (every 1 seconds)
-        const intervalId = setInterval(fetchViewers, 1000);
+    // Set up polling interval (every 1 seconds)
+    const intervalId = setInterval(fetchViewers, 1000);
 
-        // Register user view on mount
-        if(user) {
-            fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    user,
-                    taskId: task.id,
-                    action: 'view',
-                })
-            });
-        }
-
-        // Cleanup function
-        return () => {
-            clearInterval(intervalId);
-            if(user) {
-                fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        user,
-                        taskId: task.id,
-                        action: 'close',
-                    })
-                });
-            }
-        };
-    }, [user, task.id]);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, task.id]);
 
   return (
-    <Box p={6} borderWidth="1px" borderRadius="lg" shadow="sm" position="relative">
+    <Box
+      p={6}
+      borderWidth="1px"
+      borderRadius="lg"
+      shadow="sm"
+      position="relative"
+    >
       <Flex justify="space-between" align="flex-start">
         <VStack align="stretch" spacing={4} flex="1">
           <Heading size="md">{task.title}</Heading>
-          
+
           <Stack direction="row" spacing={2}>
-            <Badge colorScheme={task.status === 'Completed' ? 'green' : 'blue'}>
+            <Badge colorScheme={task.status === "Completed" ? "green" : "blue"}>
               {task.status}
             </Badge>
-            <Badge colorScheme={task.priority === 'High' ? 'red' : 'orange'}>
+            <Badge colorScheme={task.priority === "High" ? "red" : "orange"}>
               {task.priority}
             </Badge>
           </Stack>
@@ -103,5 +102,5 @@ export default function TaskLanding({ task }: Props) {
         </AvatarGroup>
       </Flex>
     </Box>
-  )
+  );
 }
