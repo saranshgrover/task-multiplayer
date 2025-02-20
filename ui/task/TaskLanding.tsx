@@ -35,8 +35,8 @@ export default function TaskLanding({ task }: Props) {
         // Initial fetch
         fetchViewers();
 
-        // Set up polling interval (every 5 seconds)
-        const intervalId = setInterval(fetchViewers, 5000);
+        // Set up polling interval (every 1 seconds)
+        const intervalId = setInterval(fetchViewers, 1000);
 
         // Register user view on mount
         if(user) {
