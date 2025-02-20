@@ -24,7 +24,7 @@ export default function TaskLanding({ task }: Props) {
     useEffect(() => {
         // Function to fetch viewers
         const fetchViewers = () => {
-            fetch(`http://localhost:3000/api/telemetry?taskId=${task.id}`)
+            fetch(`https://task-multiplayer.vercel.app/api/telemetry?taskId=${task.id}`)
                 .then(res => res.json())
                 .then(data => {
                     setUsersViewing(data.viewers)
@@ -40,7 +40,7 @@ export default function TaskLanding({ task }: Props) {
 
         // Register user view on mount
         if(user) {
-            fetch(`http://localhost:3000/api/telemetry`, {
+            fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
                 method: 'POST',
                 body: JSON.stringify({
                     user,
@@ -54,7 +54,7 @@ export default function TaskLanding({ task }: Props) {
         return () => {
             clearInterval(intervalId);
             if(user) {
-                fetch(`http://localhost:3000/api/telemetry`, {
+                fetch(`https://task-multiplayer.vercel.app/api/telemetry`, {
                     method: 'POST',
                     body: JSON.stringify({
                         user,
