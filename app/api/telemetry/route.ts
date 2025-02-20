@@ -7,7 +7,7 @@ const taskViewers: Record<string, Map<string, number>> = {};
 const allowedOrigins = [
   "https://task-multiplayer-e9ffkvnod-saranshgrovers-projects.vercel.app",
   "https://task-multiplayer-git-main-saranshgrovers-projects.vercel.app",
-  "http://localhost:3000",
+  "https://task-multiplayer.vercel.app",
 ];
 
 function getCorsHeaders(request: Request) {
